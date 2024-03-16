@@ -1,29 +1,21 @@
 # IF678 - Infraestrutura de Comunicações
-Segunda entrega do projeto de Infracom
+Terceira entrega do projeto de Infracom
 
 ### 1. Rodar o servidor:
-- abrir o terminal dentro da pasta do projeto
-- rodar o comando 'cd servidor'
-- rodar o comando 'python server.py'
+- Abrir o terminal dentro da pasta do projeto
+- Rodar o comando 'cd servidor'
+- Rodar o comando 'python server.py'
 
 ### 2. Rodar o cliente:
-- em outro terminal dentro da pasta do projeto
-- rodar o comando 'cd cliente'
-- rodar o comando 'python client.py'
+- Em outro terminal dentro da pasta do projeto
+- Rodar o comando 'cd cliente'
+- Rodar o comando 'python client.py'
+- É possível criar mais de um cliente simultâneamente
 
 ### 3. No client:
-- copie o caminho completo do arquivo que deseja enviar
-- cole o caminho no input do terminal
-- aguarde
-
-### 4. Pronto:
-- o arquivo vai ser enviado para a pasta servidor
-- em seguida o arquivo será devolvido para a pasta cliente com o nome alterado
-
-### 5. Observações:
-- nos terminais do cliente e servidor, pode ser visto quando o pacote é enviado ou recebido, se houve falha no envio ou não, e quanto tempo demorou. Também é sinalizado o estouro do temporizador
-
-##
+- Digite os comandos de acordo com o menu disponibilizado na tela
+- Comandos só serão aceitos para clientes conectados ao servidor
+- Ações de outros clientes conectados são enviadas para todos os clientes conectados
 
 ### Equipe:
 - Ênio Henrique Nunes Ribeiro
