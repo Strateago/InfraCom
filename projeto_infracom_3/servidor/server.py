@@ -1,8 +1,7 @@
 import socket 
-import time
 import random
-import threading
 
+#Variáveis padrão
 BUFFERSIZE = 1024
 HOST = 'localhost'
 PORT = 5000
@@ -12,6 +11,7 @@ TIMEOUT = 1
 #Classe para armazenar os horários disponíveis e quem reservou a sala
 class dia:
     def __init__(self):
+        #Horários: 8 a 17
         self.owner = [(), (), (), (), (), (), (), (), (), ()]
         self.horarios = [True, True, True, True, True, True, True, True, True, True]
 
@@ -33,7 +33,7 @@ udp = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 udp.bind(server)
 #Tabela onde são guardados os usuários e seus IPs e portas
 users = {}
-#Tabela das possíveis salas, como instâncias da classe "week" (semana)
+#Tabela das possíveis salas, como instâncias da classe "week"
 salas = {
     "E101": week(),
     "E102": week(),
@@ -71,7 +71,7 @@ def verificaSala(sala):
     else:
         return False
 
-#Enviar dados
+#Enviar mensagem e esperar o ACK
 def send(message, orig):
     global sendNum
     udp.settimeout(TIMEOUT)
@@ -88,15 +88,16 @@ def send(message, orig):
             elif messageR.decode() == '1ack' and sendNum == 1:
                 break
         except socket.timeout:
-            #Estouro no temporizador
+            #Estouro do temporizador
             if errorGenerator() == 0:
                 udp.sendto(messageE, orig)
 
-#Receber dados
+#Receber mensagem e enviar o ACK
 def receive():
     udp.settimeout(None)
     messageR, sender = udp.recvfrom(BUFFERSIZE)
     messageR = messageR.decode()
+    #Evitar troca de acks
     if messageR[1:] != 'ack':
         message = messageR[0] + 'ack'
         udp.sendto(message.encode(), sender)
@@ -106,9 +107,11 @@ def receive():
 while True:
     receivedMsg, sender = receive()
     receivedMsg = receivedMsg[1:]
+    #Conectar ao servidor
     if 'connect as ' in receivedMsg:
         nameAlreadyUsed = False
         parts = receivedMsg.split(' ')
+        #Verifica se o nome já está em uso, se não estiver o usuário é conectado
         for i in users:
             if i == parts[2]: nameAlreadyUsed = True
         if not nameAlreadyUsed:
@@ -120,6 +123,7 @@ while True:
         else: 
             msg = "Nome já está em uso"
             send(msg, sender)
+    #Desconectar do servidor
     elif receivedMsg == 'bye':
         userFound = False
         for i in users:
@@ -131,6 +135,7 @@ while True:
         if userFound: 
             for x in users:
                 send(msg, users[x])
+    #Enviar lista dos usuários (cliente deve estar conectado)
     elif receivedMsg == 'list':
         userFound = False
         for i in users:
@@ -143,6 +148,7 @@ while True:
                 break
         if not userFound: send('Login não realizado\n', sender)
     else:
+        #Verificar se o usuário está conectado
         userFound = False
         for i in users:
             if users[i] == sender:
@@ -151,6 +157,7 @@ while True:
         if not userFound: send('Login não realizado\n', sender)
         else:
             receivedMsg = receivedMsg.split(' ')
+            #Checar disponibilidade da sala no dia escolhido
             if receivedMsg[0] == 'check':
                 if verificaSala(receivedMsg[1]) and verificaDia(receivedMsg[2]):
                     msg = 'Horários: '
@@ -162,7 +169,7 @@ while True:
                 else:
                     msg = "Parâmetros Inválidos\n"
                     send(msg, sender)
-            
+            #Tentar reservar a sala escolhida no dia e horário escolhidos
             elif receivedMsg[0] == 'reservar':
                 if verificaSala(receivedMsg[1]) and verificaDia(receivedMsg[2]) and verificaHora(int(receivedMsg[3])):
                     if salas[receivedMsg[1]].day[receivedMsg[2]].horarios[int(receivedMsg[3])-8]:
@@ -182,7 +189,7 @@ while True:
                 else:
                     msg = "Parâmetros Inválidos\n"
                     send(msg, sender)
-
+            #Tentar cancelar a reserva da sala no dia e horário escolhidos
             elif receivedMsg[0] == 'cancelar':
                 if verificaSala(receivedMsg[1]) and verificaDia(receivedMsg[2]) and verificaHora(int(receivedMsg[3])):
                     var = salas[receivedMsg[1]].day[receivedMsg[2]].owner[int(receivedMsg[3])-8]
